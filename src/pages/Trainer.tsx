@@ -13,6 +13,7 @@ import { motion } from 'framer-motion';
 const Trainer: React.FC = () => {
   const navigate = useNavigate();
   const [isActive, setIsActive] = useState(true);
+  const [selectedExercise, setSelectedExercise] = useState('squat');
   
   const { 
     poseData, 
@@ -69,7 +70,7 @@ const Trainer: React.FC = () => {
             {/* Webcam & Overlay */}
             <AIWebcam 
               isActive={isActive} 
-              onFrame={sendFrame} 
+              onFrame={(frame) => sendFrame(frame, selectedExercise)} 
               onReady={() => setIsCameraReady(true)}
             />
             {isCameraReady && <PoseOverlay landmarks={poseData?.landmarks} />}
@@ -78,7 +79,20 @@ const Trainer: React.FC = () => {
 
         {/* Right Column: Stats Panel */}
         <div className="flex flex-col gap-6">
-          <WorkoutStats workout={poseData?.workout} angles={poseData?.angles} />
+          <div className="bg-gray-800/80 backdrop-blur-md p-4 rounded-xl border border-gray-700 shadow-lg">
+            <label className="block text-gray-400 text-sm uppercase tracking-wider mb-2">Select Exercise</label>
+            <select 
+              value={selectedExercise}
+              onChange={(e) => setSelectedExercise(e.target.value)}
+              className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg p-3 focus:outline-none focus:border-primary"
+            >
+              <option value="squat">Squat</option>
+              <option value="bicep_curl">Bicep Curl</option>
+              <option value="pushup">Pushup</option>
+            </select>
+          </div>
+
+          <WorkoutStats workout={poseData?.workout} angles={poseData?.angles} exercise={selectedExercise} />
           
           <Timer />
           

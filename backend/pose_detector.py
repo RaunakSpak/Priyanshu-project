@@ -42,10 +42,27 @@ class PoseDetector:
             r_hip = get_coord(landmarks[self.mp_pose.PoseLandmark.RIGHT_HIP.value])
             r_knee = get_coord(landmarks[self.mp_pose.PoseLandmark.RIGHT_KNEE.value])
             r_ankle = get_coord(landmarks[self.mp_pose.PoseLandmark.RIGHT_ANKLE.value])
+
+            # Left arm
+            l_shoulder = get_coord(landmarks[self.mp_pose.PoseLandmark.LEFT_SHOULDER.value])
+            l_elbow = get_coord(landmarks[self.mp_pose.PoseLandmark.LEFT_ELBOW.value])
+            l_wrist = get_coord(landmarks[self.mp_pose.PoseLandmark.LEFT_WRIST.value])
+
+            # Right arm
+            r_shoulder = get_coord(landmarks[self.mp_pose.PoseLandmark.RIGHT_SHOULDER.value])
+            r_elbow = get_coord(landmarks[self.mp_pose.PoseLandmark.RIGHT_ELBOW.value])
+            r_wrist = get_coord(landmarks[self.mp_pose.PoseLandmark.RIGHT_WRIST.value])
             
             # Calculate angles
             angles["left_knee"] = int(calculate_angle(l_hip, l_knee, l_ankle))
             angles["right_knee"] = int(calculate_angle(r_hip, r_knee, r_ankle))
+            angles["left_hip"] = int(calculate_angle(l_shoulder, l_hip, l_knee))
+            angles["right_hip"] = int(calculate_angle(r_shoulder, r_hip, r_knee))
+            
+            angles["left_elbow"] = int(calculate_angle(l_shoulder, l_elbow, l_wrist))
+            angles["right_elbow"] = int(calculate_angle(r_shoulder, r_elbow, r_wrist))
+            angles["left_shoulder"] = int(calculate_angle(l_hip, l_shoulder, l_elbow))
+            angles["right_shoulder"] = int(calculate_angle(r_hip, r_shoulder, r_elbow))
             
             # Return data
         return landmarks_list, angles

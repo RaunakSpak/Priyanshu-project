@@ -7,10 +7,14 @@ export interface Landmark {
 }
 
 export interface Angles {
-  left_knee: number;
-  right_knee: number;
-  left_hip: number;
-  right_hip: number;
+  left_knee?: number;
+  right_knee?: number;
+  left_hip?: number;
+  right_hip?: number;
+  left_elbow?: number;
+  right_elbow?: number;
+  left_shoulder?: number;
+  right_shoulder?: number;
 }
 
 export interface WorkoutData {

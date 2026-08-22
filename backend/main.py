@@ -3,6 +3,8 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pose_detector import PoseDetector
 from squat_counter import SquatCounter
+from bicep_counter import BicepCounter
+from pushup_counter import PushupCounter
 from image_utils import base64_to_image
 from database import engine, Base
 from routes import auth
@@ -32,7 +34,11 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     
     pose_detector = PoseDetector()
-    squat_counter = SquatCounter()
+    counters = {
+        "squat": SquatCounter(),
+        "bicep_curl": BicepCounter(),
+        "pushup": PushupCounter()
+    }
     
     try:
         while True:
@@ -43,8 +49,10 @@ async def websocket_endpoint(websocket: WebSocket):
                 # Parse the JSON payload if it is JSON, or direct base64
                 payload = json.loads(data)
                 frame_data = payload.get("frame", "")
+                exercise_type = payload.get("exercise", "squat")
             except json.JSONDecodeError:
                 frame_data = data
+                exercise_type = "squat"
                 
             if not frame_data:
                 continue
@@ -56,20 +64,35 @@ async def websocket_endpoint(websocket: WebSocket):
             landmarks, angles = pose_detector.find_pose(img)
             
             if landmarks and angles:
-                # Process squat logic
-                squat_data = squat_counter.process(
-                    angles["left_knee"], 
-                    angles["right_knee"],
-                    angles["left_hip"],
-                    angles["right_hip"]
-                )
+                workout_data = None
+                
+                # Process logic based on exercise
+                if exercise_type == "bicep_curl":
+                    workout_data = counters["bicep_curl"].process(
+                        angles.get("left_elbow", 0),
+                        angles.get("right_elbow", 0)
+                    )
+                elif exercise_type == "pushup":
+                    workout_data = counters["pushup"].process(
+                        angles.get("left_elbow", 0),
+                        angles.get("right_elbow", 0),
+                        angles.get("left_shoulder", 0),
+                        angles.get("right_shoulder", 0)
+                    )
+                else: # Default to squat
+                    workout_data = counters["squat"].process(
+                        angles.get("left_knee", 0), 
+                        angles.get("right_knee", 0),
+                        angles.get("left_hip", 0),
+                        angles.get("right_hip", 0)
+                    )
                 
                 # Send back the results
                 response = {
                     "status": "success",
                     "landmarks": landmarks,
                     "angles": angles,
-                    "workout": squat_data
+                    "workout": workout_data
                 }
             else:
                 response = {

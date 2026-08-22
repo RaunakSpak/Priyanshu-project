@@ -28,7 +28,14 @@ export const ResetPassword = () => {
             });
             setSuccess(true);
         } catch (err: any) {
-            setApiError(err.response?.data?.detail || 'Failed to reset password. The link might be expired.');
+            let errorMessage = 'Failed to reset password. The link might be expired.';
+            const detail = err.response?.data?.detail;
+            if (typeof detail === 'string') {
+                errorMessage = detail;
+            } else if (Array.isArray(detail)) {
+                errorMessage = detail[0]?.msg || errorMessage;
+            }
+            setApiError(errorMessage);
         } finally {
             setIsLoading(false);
         }

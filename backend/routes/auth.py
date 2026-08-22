@@ -5,7 +5,10 @@ from database import get_db
 from models.user import User
 from schemas.user import UserCreate, UserLogin, UserResponse, Token, ForgotPasswordRequest, ResetPasswordRequest
 from utils.security import get_password_hash, verify_password
+from utils.security import get_password_hash, verify_password
 from utils.jwt import create_access_token, get_current_user, create_reset_token, verify_reset_token
+from utils.email_utils import send_reset_password_email
+from config import settings
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
@@ -71,15 +74,10 @@ def forgot_password(req: ForgotPasswordRequest, db: Session = Depends(get_db)):
         return {"message": "If an account with that email exists, a reset link has been sent."}
     
     token = create_reset_token(email=user.email)
-    reset_link = f"http://localhost:5173/reset-password?token={token}"
+    reset_link = f"{settings.FRONTEND_URL}/reset-password?token={token}"
     
-    # Simulate sending email
-    print("\n" + "="*50)
-    print("MOCK EMAIL SENT")
-    print(f"To: {user.email}")
-    print(f"Subject: Reset Your FitVision Password")
-    print(f"Body: Click the link below to reset your password:\n{reset_link}")
-    print("="*50 + "\n")
+    # Send actual email
+    send_reset_password_email(user.email, reset_link)
     
     return {"message": "If an account with that email exists, a reset link has been sent."}
 

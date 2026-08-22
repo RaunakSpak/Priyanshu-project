@@ -44,9 +44,9 @@ export const usePoseDetection = () => {
     };
   }, []);
 
-  const sendFrame = useCallback((base64Frame: string) => {
+  const sendFrame = useCallback((base64Frame: string, exercise: string = 'squat') => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ frame: base64Frame }));
+      wsRef.current.send(JSON.stringify({ frame: base64Frame, exercise }));
     }
   }, []);
 
